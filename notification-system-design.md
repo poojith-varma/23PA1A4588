@@ -226,3 +226,23 @@ FROM notifications
 WHERE type = 'Placement'
   AND created_at >= NOW() - INTERVAL '7 days';
 ```
+
+
+
+# Stage 4
+
+Getting notifications from the database every time a page loads is not efficient. It increases the number of database requests and makes the page slower.
+
+To make the system faster, I would:
+
+- **Use Redis Cache:** Save frequently used notifications and unread counts in Redis so the database is not queried every time.
+- **Use Pagination:** Load only a small number of notifications instead of loading all of them at once.
+- **Use WebSockets:** Send new notifications to users instantly instead of checking the server again and again.
+- **Add Database Indexes:** Create indexes on columns that are searched often to make queries faster.
+
+## Trade-offs
+
+- **Redis Cache:** Makes the application faster, but keeping the cache updated can be difficult.
+- **Pagination:** Reduces database load, but users need to load more pages to see older notifications.
+- **WebSockets:** Give real-time updates, but they need a permanent connection between the client and server.
+- **Indexes:** Improve read speed, but they make insert, update, and delete operations a little slower.
