@@ -190,3 +190,39 @@ UPDATE notifications
 SET is_read = true
 WHERE id = 'notification_id';
 ```
+
+
+
+# Stage 3
+
+The original SQL statement is incomplete because the `SELECT` clause does not specify which columns should be returned. A corrected version is shown below:
+
+```sql
+SELECT *
+FROM notifications
+WHERE student_id = 1042
+  AND is_read = false
+ORDER BY created_at DESC;
+```
+
+This query may perform poorly when the `notifications` table contains nearly 5 million records. Without an appropriate index, the database engine must scan a significant portion of the table before sorting the matching rows, which increases execution time.
+
+A good optimization is to create a composite index covering the columns used for filtering and ordering.
+
+```sql
+CREATE INDEX idx_notifications
+ON notifications (student_id, is_read, created_at DESC);
+```
+
+With this index in place, the database can locate the required records more efficiently while minimizing the amount of data that needs to be scanned and sorted.
+
+Creating indexes on every column is generally not recommended. Although indexes improve read performance, they also require additional storage and increase the cost of `INSERT`, `UPDATE`, and `DELETE` operations. Therefore, indexes should only be created for columns that are commonly involved in search conditions, joins, or sorting.
+
+The following query retrieves the unique IDs of students who have received placement-related notifications within the past seven days:
+
+```sql
+SELECT DISTINCT student_id
+FROM notifications
+WHERE type = 'Placement'
+  AND created_at >= NOW() - INTERVAL '7 days';
+```
